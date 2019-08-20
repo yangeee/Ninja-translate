@@ -6,17 +6,18 @@ function Panel() {
 Panel.prototype.createPanel = function() {
   let container = document.createElement('div')
   container.id = 'ninja-translate'
+  container.style = ` position: fixed;z-index: 99999;left:0px;top:0px;`
   let html = `
     <div class="ninja_panel">
-    <header>Ninja-translate <span class="close">X</span></header>
+    <header>Ninja-translate <span class="ninja_translate_close">X</span></header>
     <main>
-      <div class="source">
-        <div class="title">英语</div>
-        <div class="content"></div>
+      <div class="ninja_translate_source">
+        <div class="ninja_translate_title">英语</div>
+        <div class="ninja_translate_content"></div>
       </div>
-      <div class="target">
-        <div class="title">简体中文</div>
-        <div class="content"></div>
+      <div class="ninja_translate_target">
+        <div class="ninja_translate_title">简体中文</div>
+        <div class="ninja_translate_content"></div>
       </div>
     </main>
   </div>
@@ -25,9 +26,9 @@ Panel.prototype.createPanel = function() {
   document.body.appendChild(container)
   this.container = container
   this.panel = container.querySelector('.ninja_panel')
-  this.source = container.querySelector('.source .content')
-  this.close = container.querySelector('.close')
-  this.target = container.querySelector('.target .content')
+  this.sourceContent = container.querySelector('.ninja_translate_source .ninja_translate_content')
+  this.close = container.querySelector('.ninja_translate_close')
+  this.targetContent = container.querySelector('.ninja_translate_target .ninja_translate_content')
 }
 
 Panel.prototype.bind = function() {
@@ -40,19 +41,17 @@ Panel.prototype.bind = function() {
 }
 
 Panel.prototype.moveTo = function(x, y) {
-  this.container.style.left = x + 'px'
-  this.container.style.top = y + 'px'
+  this.container.style.transform = `translateX(${x}px) translateY(${y}px)`
 }
 
 Panel.prototype.translate = function(str) {
-  this.source.innerHTML = str
+  this.sourceContent.innerHTML = str
   fetch(
     `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=zh-CN&dt=t&q=${str}`
   )
     .then(res => res.json())
     .then(result => {
-      console.log(result)
-      this.target.innerText = result[0][0][0]
+      this.targetContent.innerText = result[0][0][0]
     })
 }
 
@@ -72,6 +71,8 @@ Panel.prototype.isShow = function() {
 
 let panel = new Panel()
 
+
+
 document.onmouseup = function(e) {
   let str = document
     .getSelection()
@@ -79,6 +80,6 @@ document.onmouseup = function(e) {
     .trim()
   if (str === '') return
   panel.translate(str)
-  panel.moveTo(e.pageX, e.pageY)
+  panel.moveTo(e.clientX, e.clientY)
   panel.show()
 }
